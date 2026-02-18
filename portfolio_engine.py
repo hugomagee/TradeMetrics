@@ -16,9 +16,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-# ─────────────────────────────────────────
 #  IBKR DATA INGESTION
-# ─────────────────────────────────────────
 
 class IBKRDataLoader:
     """
@@ -68,7 +66,7 @@ class IBKRDataLoader:
         if csv_path:
             df = pd.read_csv(csv_path, parse_dates=["date"], index_col="date")
             return df["nav"].sort_index()
-        # Placeholder — in live use, pull from IBKR account summary
+        # TODO: implement live NAV pull from IBKR account summary
         raise NotImplementedError("Pass csv_path= for NAV history.")
 
     @staticmethod
@@ -86,9 +84,7 @@ class IBKRDataLoader:
         return df
 
 
-# ─────────────────────────────────────────
 #  METRICS ENGINE
-# ─────────────────────────────────────────
 
 class MetricsEngine:
     """
@@ -110,7 +106,6 @@ class MetricsEngine:
         self.rf     = rf
         self.returns = self.nav.pct_change().dropna()
 
-    # ── Core metrics ──────────────────────────────────
 
     def total_return(self) -> float:
         return (self.nav.iloc[-1] / self.nav.iloc[0]) - 1
@@ -161,7 +156,6 @@ class MetricsEngine:
         losses = abs(closed[closed["pnl"] <= 0]["pnl"].sum())
         return wins / losses if losses != 0 else np.nan
 
-    # ── Rolling metrics ───────────────────────────────
 
     def rolling_sharpe(self, window: int = 63) -> pd.Series:
         """63-trading-day (≈ 3 month) rolling Sharpe ratio."""
@@ -172,7 +166,6 @@ class MetricsEngine:
     def rolling_vol(self, window: int = 21) -> pd.Series:
         return self.returns.rolling(window).std() * np.sqrt(self.TRADING_DAYS)
 
-    # ── Summary ───────────────────────────────────────
 
     def summary(self) -> pd.Series:
         return pd.Series({
@@ -188,13 +181,12 @@ class MetricsEngine:
             "Profit Factor":           round(self.profit_factor(),        2),
         }, name="TradeMetrics")
 
-    # ── Internal helpers ──────────────────────────────
 
     def _closed_pnl(self) -> pd.DataFrame:
         """FIFO P&L for all fully closed positions."""
         records = []
         for ticker, grp in self.trades.groupby("ticker"):
-            queue = []  # (qty, price) FIFO
+            queue = []  # buy lots waiting to be matched
             for _, row in grp.iterrows():
                 if row["side"] == 1:   # buy
                     queue.append([row["qty"], row["price"]])
@@ -213,9 +205,7 @@ class MetricsEngine:
         return pd.DataFrame(records) if records else pd.DataFrame(columns=["ticker","pnl","date"])
 
 
-# ─────────────────────────────────────────
 #  P&L ATTRIBUTION ENGINE
-# ─────────────────────────────────────────
 
 class AttributionEngine:
     """
@@ -272,9 +262,7 @@ class AttributionEngine:
         return self.pnl_by_position().tail(n).sort_values("pnl_eur")
 
 
-# ─────────────────────────────────────────
 #  BENCHMARK COMPARATOR
-# ─────────────────────────────────────────
 
 class BenchmarkAnalysis:
     """
@@ -293,10 +281,7 @@ class BenchmarkAnalysis:
         # Align indices
         idx = self.port.index.intersection(self.bench.index)
         if len(idx) == 0:
-            raise ValueError(
-                "No overlapping dates between portfolio and benchmark data. "
-                "Ensure they cover the same time period."
-            )
+            raise ValueError("No overlapping dates between portfolio and benchmark data. Ensure they cover the same time period.")
         self.port  = self.port.loc[idx]
         self.bench = self.bench.loc[idx]
 
@@ -343,9 +328,7 @@ class BenchmarkAnalysis:
         return pd.DataFrame(rows)
 
 
-# ─────────────────────────────────────────
 #  POSITION SIZING ENGINE
-# ─────────────────────────────────────────
 
 class PositionSizer:
     """
@@ -410,9 +393,7 @@ class PositionSizer:
         }
 
 
-# ─────────────────────────────────────────
 #  QUICK-START DEMO
-# ─────────────────────────────────────────
 
 def _generate_demo_data(n: int = 252, seed: int = 42) -> tuple:
     """Generate synthetic but realistic portfolio data for demo / testing."""
@@ -474,19 +455,16 @@ if __name__ == "__main__":
 
     nav, bench, trades = _generate_demo_data()
 
-    # ── Metrics
     engine = MetricsEngine(nav, trades)
     print("\n  Performance Summary")
     print("-" * 40)
     print(engine.summary().to_string())
 
-    # ── Benchmark
     bm = BenchmarkAnalysis(engine.returns, bench)
     print("\n  Benchmark Comparison")
     print("-" * 40)
     print(bm.summary().to_string(index=False))
 
-    # ── Position sizing
     sizer  = PositionSizer(nav=nav.iloc[-1])
     sizing = sizer.recommended_size(
         ticker="NVDA", ticker_vol=0.38,
@@ -497,4 +475,4 @@ if __name__ == "__main__":
     for k, v in sizing.items():
         print(f"  {k:<22} {v}")
 
-    print("\n✅  Engine loaded successfully. Connect IBKR TWS to use live data.")
+    print("\n  Engine loaded successfully. Connect IBKR TWS to use live data.")
