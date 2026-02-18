@@ -1,3 +1,12 @@
+"""
+TradeMetrics — Portfolio Analytics Engine
+==========================================
+Ingests 12 months of Interactive Brokers trade data via IBKR API,
+computes risk-adjusted performance metrics, and drives position sizing
+decisions for an active leveraged equity portfolio.
+
+Author : Hugo Magee
+"""
 
 import pandas as pd
 import numpy as np
