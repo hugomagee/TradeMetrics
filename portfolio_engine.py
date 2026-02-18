@@ -77,6 +77,11 @@ class IBKRDataLoader:
         df["datetime"] = pd.to_datetime(df["datetime"])
         df = df.sort_values("datetime").reset_index(drop=True)
         df["side"] = df["action"].map({"BOT": 1, "SLD": -1, "BUY": 1, "SELL": -1})
+        # Drop rows with invalid action codes (resulting in NaN side)
+        invalid_count = df["side"].isna().sum()
+        if invalid_count > 0:
+            print(f"Warning: Dropped {invalid_count} trades with unrecognized action codes")
+            df = df.dropna(subset=["side"])
         df["notional"] = df["qty"] * df["price"] * df["side"]
         return df
 
@@ -287,6 +292,11 @@ class BenchmarkAnalysis:
         self.bench = benchmark_prices.pct_change().dropna()
         # Align indices
         idx = self.port.index.intersection(self.bench.index)
+        if len(idx) == 0:
+            raise ValueError(
+                "No overlapping dates between portfolio and benchmark data. "
+                "Ensure they cover the same time period."
+            )
         self.port  = self.port.loc[idx]
         self.bench = self.bench.loc[idx]
 
@@ -466,13 +476,13 @@ if __name__ == "__main__":
 
     # ── Metrics
     engine = MetricsEngine(nav, trades)
-    print("\n📊  Performance Summary")
+    print("\n  Performance Summary")
     print("-" * 40)
     print(engine.summary().to_string())
 
     # ── Benchmark
     bm = BenchmarkAnalysis(engine.returns, bench)
-    print("\n📈  Benchmark Comparison")
+    print("\n  Benchmark Comparison")
     print("-" * 40)
     print(bm.summary().to_string(index=False))
 
@@ -482,7 +492,7 @@ if __name__ == "__main__":
         ticker="NVDA", ticker_vol=0.38,
         win_rate=0.68, avg_win=0.21, avg_loss=0.09
     )
-    print("\n🎯  Position Sizing — NVDA")
+    print("\n  Position Sizing — NVDA")
     print("-" * 40)
     for k, v in sizing.items():
         print(f"  {k:<22} {v}")
