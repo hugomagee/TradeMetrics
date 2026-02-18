@@ -1,12 +1,3 @@
-"""
-TradeMetrics — Portfolio Analytics Engine
-==========================================
-Ingests 12 months of Interactive Brokers trade data via IBKR API,
-computes risk-adjusted performance metrics, and drives position sizing
-decisions for an active leveraged equity portfolio.
-
-Author : Hugo Moran
-"""
 
 import pandas as pd
 import numpy as np
@@ -407,17 +398,31 @@ class PositionSizer:
 def _generate_demo_data(n: int = 252, seed: int = 42) -> tuple:
     """Generate synthetic but realistic portfolio data for demo / testing."""
     np.random.seed(seed)
-    dates   = pd.bdate_range(end=datetime.today(), periods=n)
-    nav     = pd.Series(
-        35_000 * np.cumprod(1 + np.random.normal(0.00118, 0.0074, n)),
+    dates = pd.bdate_range(end=datetime.today(), periods=n)
+    
+    # Generate CORRELATED returns (portfolio has beta ~1.3 to SPY)
+    spy_ret = np.random.normal(0.00082, 0.0055, n)  # SPY base returns
+    market_shock = np.random.normal(0, 0.004, n)    # Common market factor
+    
+    # Portfolio = 1.3*SPY + alpha + idiosyncratic
+    port_ret = (1.3 * spy_ret + 
+                0.0004 +  # daily alpha ≈ 10% annual outperformance
+                np.random.normal(0, 0.003, n))  # stock-specific risk
+    
+    qqq_ret = (1.05 * spy_ret +  # QQQ slightly more volatile than SPY
+               np.random.normal(0, 0.002, n))
+    
+    # Convert returns to price series
+    nav = pd.Series(
+        35_000 * np.cumprod(1 + port_ret),
         index=dates, name="nav"
     )
     spy_prices = pd.Series(
-        450 * np.cumprod(1 + np.random.normal(0.00082, 0.0055, n)),
+        450 * np.cumprod(1 + spy_ret),
         index=dates, name="SPY"
     )
     qqq_prices = pd.Series(
-        380 * np.cumprod(1 + np.random.normal(0.00095, 0.0065, n)),
+        380 * np.cumprod(1 + qqq_ret),
         index=dates, name="QQQ"
     )
     bench = pd.DataFrame({"SPY": spy_prices, "QQQ": qqq_prices})
