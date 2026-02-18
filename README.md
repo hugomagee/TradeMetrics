@@ -117,7 +117,7 @@ Open `dashboard.html` in any browser. It runs fully client-side — no server ne
   TradeMetrics — Analytics Engine Demo
 ============================================================
 
-📊  Performance Summary
+Performance Summary
 ----------------------------------------
 Total Return (%)          34.70
 Annualised Return (%)     34.70
@@ -130,13 +130,13 @@ Daily VaR 95% (€)          -621
 Win Rate (%)               68.40
 Profit Factor               2.10
 
-📈  Benchmark Comparison
+Benchmark Comparison
 ----------------------------------------
 Benchmark  Alpha (ann)   Beta  Info Ratio  Correlation
       SPY       10.60%   1.34        1.12        0.781
       QQQ        5.40%   1.18        0.87        0.803
 
-🎯  Position Sizing — NVDA
+Position Sizing — NVDA
 ----------------------------------------
   ticker                 NVDA
   kelly_fraction         0.0847
