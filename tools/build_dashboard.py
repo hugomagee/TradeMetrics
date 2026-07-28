@@ -488,7 +488,9 @@ function axisText(x, y, text, opts) {
  */
 function lineChart(mount, series, dates, opts) {
   opts = opts || {};
-  const W = 720, H = 300, P = { t:12, r:opts.rightPad || 58, b:30, l:opts.leftPad || 4 };
+  // Value axis on the LEFT, direct series labels on the RIGHT, so axis ticks
+  // and end-labels never compete for the same margin.
+  const W = 720, H = 300, P = { t:12, r:opts.rightPad || 62, b:30, l:opts.leftPad || 40 };
   const all = series.flatMap(s => s.data);
   let lo = Math.min(...all), hi = Math.max(...all);
   if (opts.includeZero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
@@ -506,8 +508,8 @@ function lineChart(mount, series, dates, opts) {
     svg.appendChild(el('line', {
       x1:P.l, x2:W - P.r, y1:Y(t), y2:Y(t),
       stroke:isZero ? AXIS : GRID, 'stroke-width':1 }));
-    svg.appendChild(axisText(W - P.r + 8, Y(t) + 3.8,
-      opts.fmtAxis ? opts.fmtAxis(t) : t.toFixed(0)));
+    svg.appendChild(axisText(P.l - 8, Y(t) + 3.8,
+      opts.fmtAxis ? opts.fmtAxis(t) : t.toFixed(0), { 'text-anchor':'end' }));
   });
 
   // x-axis baseline + date ticks
@@ -540,9 +542,11 @@ function lineChart(mount, series, dates, opts) {
   // direct end-labels (identity without relying on colour alone)
   if (opts.endLabels !== false) {
     const placed = [];
-    series.forEach(s => {
+    // Highest series first, nudging collisions downward, so converging lines
+    // keep labels in the same vertical order as the lines themselves.
+    series.slice().sort((a, b) => b.data[n - 1] - a.data[n - 1]).forEach(s => {
       let y = Y(s.data[n - 1]);
-      while (placed.some(p => Math.abs(p - y) < 12)) y += 12;
+      while (placed.some(p => Math.abs(p - y) < 14)) y += 14;
       placed.push(y);
       const t = axisText(W - P.r + 8, y + 3.8, s.name,
         { fill:INK2, 'font-size':11, 'font-weight':600 });
@@ -598,7 +602,7 @@ function lineChart(mount, series, dates, opts) {
 /** Column chart for signed values: diverging blue/red, 2px surface gaps. */
 function barChart(mount, values, labels, opts) {
   opts = opts || {};
-  const W = 440, H = 300, P = { t:12, r:46, b:44, l:4 };
+  const W = 440, H = 300, P = { t:12, r:8, b:44, l:44 };
   let lo = Math.min(0, ...values), hi = Math.max(0, ...values);
   const pad = (hi - lo) * 0.12 || 1;
   lo -= pad; hi += pad;
@@ -614,7 +618,8 @@ function barChart(mount, values, labels, opts) {
     svg.appendChild(el('line', {
       x1:P.l, x2:W - P.r, y1:Y(t), y2:Y(t),
       stroke:isZero ? AXIS : GRID, 'stroke-width':1 }));
-    svg.appendChild(axisText(W - P.r + 8, Y(t) + 3.8, t.toFixed(1) + '%'));
+    svg.appendChild(axisText(P.l - 8, Y(t) + 3.8, t.toFixed(1) + '%',
+      { 'text-anchor':'end' }));
   });
 
   values.forEach((v, i) => {
