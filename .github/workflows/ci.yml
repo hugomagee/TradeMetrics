@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest
+
+      - name: Verify committed sample data matches its generator
+        run: |
+          python tools/make_sample_data.py
+          git diff --exit-code -- data/samples/
+
+      - name: Verify the demo is deterministic and the report rebuilds
+        run: |
+          python -m trademetrics.demo
+          python tools/build_dashboard.py
+          git diff --exit-code -- outputs/results.json trademetrics.html
+
+      - name: Execute the validation notebook
+        run: |
+          jupyter nbconvert --to notebook --execute \
+            analysis/metric_validation.ipynb \
+            --output /tmp/metric_validation_ci.ipynb \
+            --ExecutePreprocessor.timeout=900
