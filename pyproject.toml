@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# Narrative notebooks use notebook idioms: mid-cell imports, lambdas, display loops
+"*.ipynb" = ["E402", "E501", "E731", "B007", "B905", "F541", "I001"]
