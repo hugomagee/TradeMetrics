@@ -13,3 +13,6 @@ select = ["E", "F", "W", "I", "UP", "B"]
 [tool.ruff.lint.per-file-ignores]
 # Narrative notebooks use notebook idioms: mid-cell imports, lambdas, display loops
 "*.ipynb" = ["E402", "E501", "E731", "B007", "B905", "F541", "I001"]
+# Holds the dashboard's HTML/CSS/JS template as a string literal; wrapping those
+# lines to satisfy the Python line limit would corrupt the markup.
+"tools/build_dashboard.py" = ["E501"]
