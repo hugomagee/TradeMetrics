@@ -11,443 +11,696 @@
 -->
 <style>
   :root {
-    --bg:#050810; --bg2:#090d1a; --surface:#111827; --border:#1e2d45;
-    --border2:#253550; --accent:#00d4aa; --accent2:#0099ff; --accent3:#ff6b35;
-    --red:#ff4757; --green:#2ed573; --text:#e8edf5; --text2:#8fa3c0; --text3:#4a6080;
-    --gold:#ffd700;
+    color-scheme: light;
+    --surface:#ffffff;
+    --plane:#f4f4f1;
+    --ink:#0b0b0b;
+    --ink-2:#52514e;
+    --muted:#898781;
+    --grid:#e6e5de;
+    --axis:#c3c2b7;
+    --rule:#d9d8d1;
+    --rule-strong:#0b0b0b;
+    --series-1:#2a78d6;
+    --series-2:#eb6834;
+    --series-3:#1baf7a;
+    --neg:#c02f2f;
+    --pos:#2a78d6;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
   body {
-    font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-    background:var(--bg); color:var(--text); min-height:100vh;
+    font-family:var(--sans);
+    background:var(--plane);
+    color:var(--ink);
+    line-height:1.5;
+    font-size:15px;
   }
-  header {
-    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
-    padding:18px 32px; border-bottom:1px solid var(--border); background:var(--bg2);
+  .sheet {
+    max-width:1180px; margin:0 auto; background:var(--surface);
+    border-left:1px solid var(--rule); border-right:1px solid var(--rule);
+    min-height:100vh;
   }
-  .logo-text { font-size:20px; font-weight:800; letter-spacing:-0.5px; }
-  .logo-text span { color:var(--accent); }
-  .logo-sub { font-size:10px; color:var(--text3); letter-spacing:2px; text-transform:uppercase; }
-  .data-badge {
-    padding:5px 12px; border-radius:4px; border:1px solid var(--accent3);
-    background:rgba(255,107,53,0.1); font-size:10px; color:var(--accent3); letter-spacing:1.5px;
+  .pad { padding:0 44px; }
+  @media (max-width:760px) { .pad { padding:0 20px; } }
+
+  /* ── masthead ─────────────────────────────────────────────── */
+  .masthead {
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:28px; flex-wrap:wrap;
+    padding-top:40px; padding-bottom:16px;
+    border-bottom:2px solid var(--rule-strong);
   }
-  .meta-line { font-size:11px; color:var(--text3); margin-top:4px; }
-  main { max-width:1500px; margin:0 auto; padding:24px 32px; display:flex; flex-direction:column; gap:20px; }
-  .notice {
-    padding:14px 18px; border-radius:8px; border:1px solid var(--border2);
-    background:var(--surface); font-size:12px; line-height:1.7; color:var(--text2);
+  .wordmark { font-size:27px; font-weight:680; letter-spacing:-0.022em; line-height:1.1; }
+  .wordmark em { font-style:normal; font-weight:400; color:var(--ink-2); }
+  .tagline { font-size:13px; color:var(--ink-2); margin-top:5px; }
+  .masthead-meta {
+    display:grid; grid-template-columns:auto auto; gap:2px 16px;
+    font-size:12px; color:var(--ink-2); text-align:right;
+    font-variant-numeric:tabular-nums;
   }
-  .notice strong { color:var(--text); }
-  .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
-  .kpi-card {
-    background:var(--surface); border:1px solid var(--border); border-radius:8px;
-    padding:16px 18px; position:relative; overflow:hidden;
+  .masthead-meta dt { color:var(--muted); }
+  .masthead-meta dd { font-weight:530; }
+  .kicker {
+    display:inline-block; margin-top:14px;
+    font-size:10.5px; font-weight:640; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--neg); border:1px solid currentColor; padding:3px 8px;
   }
-  .kpi-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
-  .kpi-card.green::after  { background:linear-gradient(90deg,var(--green),transparent); }
-  .kpi-card.red::after    { background:linear-gradient(90deg,var(--red),transparent); }
-  .kpi-card.blue::after   { background:linear-gradient(90deg,var(--accent2),transparent); }
-  .kpi-card.gold::after   { background:linear-gradient(90deg,var(--gold),transparent); }
-  .kpi-card.teal::after   { background:linear-gradient(90deg,var(--accent),transparent); }
-  .kpi-card.orange::after { background:linear-gradient(90deg,var(--accent3),transparent); }
-  .kpi-label { font-size:9px; color:var(--text3); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
-  .kpi-value { font-size:22px; font-weight:700; line-height:1.1; }
-  .kpi-value.up { color:var(--green); } .kpi-value.down { color:var(--red); }
-  .kpi-value.blue { color:var(--accent2); } .kpi-value.gold { color:var(--gold); }
-  .kpi-value.orange { color:var(--accent3); }
-  .kpi-sub { font-size:10px; color:var(--text3); margin-top:6px; line-height:1.5; }
-  .grid-2 { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
-  .grid-2b { display:grid; grid-template-columns:1.4fr 1fr; gap:16px; }
-  @media (max-width:1100px) { .grid-2, .grid-2b { grid-template-columns:1fr; } }
-  .card { background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-  .card-header {
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:14px 18px; border-bottom:1px solid var(--border); background:var(--bg2);
+
+  /* ── standfirst ───────────────────────────────────────────── */
+  .standfirst {
+    padding-top:22px; padding-bottom:26px;
+    border-bottom:1px solid var(--rule);
+    font-size:14.5px; line-height:1.65; color:var(--ink-2);
+    max-width:76ch;
   }
-  .card-title { font-size:13px; font-weight:700; }
-  .card-title span { color:var(--text3); font-size:11px; font-weight:400; margin-left:8px; }
-  .card-badge { font-size:9px; padding:3px 8px; border-radius:3px; letter-spacing:1px;
-    text-transform:uppercase; background:rgba(0,212,170,0.15); color:var(--accent);
-    border:1px solid rgba(0,212,170,0.3); white-space:nowrap; }
-  .chart-body { padding:12px 8px 4px; }
-  svg { display:block; width:100%; height:auto; }
-  .legend { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
-  .leg-item { display:flex; gap:6px; align-items:center; font-size:10px; color:var(--text3); }
-  .leg-line { width:18px; height:2px; border-radius:1px; }
-  .table-wrap { overflow:auto; max-height:420px; }
-  table { width:100%; border-collapse:collapse; font-size:11px; }
+  .standfirst strong { color:var(--ink); font-weight:620; }
+  .standfirst p + p { margin-top:11px; }
+  code {
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:0.88em; background:var(--plane); padding:1px 5px;
+    border:1px solid var(--rule); white-space:nowrap;
+  }
+
+  /* ── section heads ────────────────────────────────────────── */
+  .section { padding-top:34px; }
+  .section-head {
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+    padding-bottom:9px; margin-bottom:18px; border-bottom:1px solid var(--rule-strong);
+  }
+  .section-head h2 { font-size:12px; font-weight:660; letter-spacing:0.09em; text-transform:uppercase; }
+  .section-head .note { font-size:12px; color:var(--muted); }
+
+  /* ── key figures: rules, not boxes ────────────────────────── */
+  .figures { display:grid; grid-template-columns:repeat(6,1fr); }
+  @media (max-width:980px) { .figures { grid-template-columns:repeat(3,1fr); row-gap:24px; } }
+  @media (max-width:560px) { .figures { grid-template-columns:repeat(2,1fr); } }
+  .figure { padding:2px 18px 0; border-left:1px solid var(--rule); }
+  .figure:first-child { padding-left:0; border-left:0; }
+  .figure-label {
+    font-size:10.5px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:7px;
+  }
+  .figure-value { font-size:30px; font-weight:640; letter-spacing:-0.02em; line-height:1.05; }
+  .figure-value.neg { color:var(--neg); }
+  .figure-sub { font-size:11.5px; color:var(--ink-2); margin-top:7px; line-height:1.5; font-variant-numeric:tabular-nums; }
+
+  /* ── charts ───────────────────────────────────────────────── */
+  .chart-grid { display:grid; grid-template-columns:1.55fr 1fr; gap:34px; }
+  @media (max-width:980px) { .chart-grid { grid-template-columns:1fr; gap:30px; } }
+  .chart-title { font-size:14px; font-weight:620; }
+  .chart-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+  .chart-head { margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; padding-top:2px; }
+  .legend-item { display:flex; gap:6px; align-items:center; font-size:11.5px; color:var(--ink-2); white-space:nowrap; }
+  .legend-key { width:14px; height:2px; flex:none; }
+  .chart-wrap { position:relative; }
+  svg { display:block; width:100%; height:auto; overflow:visible; }
+
+  /* ── tooltip ──────────────────────────────────────────────── */
+  .tip {
+    position:fixed; z-index:50; pointer-events:none; opacity:0;
+    background:var(--surface); border:1px solid var(--axis);
+    padding:8px 10px; font-size:11.5px; line-height:1.55;
+    font-variant-numeric:tabular-nums; color:var(--ink);
+    box-shadow:0 1px 2px rgba(11,11,11,0.09); transition:opacity .08s;
+    min-width:130px;
+  }
+  .tip-title { font-weight:620; margin-bottom:4px; color:var(--ink); }
+  .tip-row { display:flex; justify-content:space-between; gap:14px; }
+  .tip-key { display:flex; align-items:center; gap:6px; color:var(--ink-2); }
+  .tip-dot { width:8px; height:8px; flex:none; }
+
+  /* ── tables ───────────────────────────────────────────────── */
+  .table-scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  caption {
+    caption-side:top; text-align:left; font-size:12px; color:var(--muted);
+    padding-bottom:8px;
+  }
+  th, td { padding:7px 12px; text-align:right; white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; padding-left:0; }
+  th:last-child, td:last-child { padding-right:0; }
   thead th {
-    position:sticky; top:0; z-index:2; padding:10px 14px; text-align:left;
-    font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3);
-    background:var(--bg2); border-bottom:1px solid var(--border); white-space:nowrap;
-    cursor:pointer; user-select:none;
+    font-size:10.5px; font-weight:620; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--muted); border-bottom:1px solid var(--rule-strong);
+    cursor:pointer; user-select:none; position:sticky; top:0; background:var(--surface);
   }
-  thead th:hover, thead th.sorted { color:var(--accent); }
-  tbody tr { border-bottom:1px solid rgba(30,45,69,0.5); }
-  tbody tr:hover { background:rgba(0,212,170,0.04); }
-  td { padding:9px 14px; white-space:nowrap; }
-  .ticker { color:var(--accent); font-weight:600; }
-  .tag { font-size:9px; padding:2px 7px; border-radius:3px; letter-spacing:1px; }
-  .tag.long  { background:rgba(46,213,115,0.1); color:var(--green); border:1px solid rgba(46,213,115,0.2); }
-  .tag.short { background:rgba(255,71,87,0.1); color:var(--red); border:1px solid rgba(255,71,87,0.2); }
-  .pos { color:var(--green); } .neg { color:var(--red); }
-  .rows { padding:16px; display:flex; flex-direction:column; gap:10px; }
-  .row {
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    padding:10px 14px; background:var(--bg2); border:1px solid var(--border); border-radius:6px;
+  thead th:hover { color:var(--ink); }
+  thead th[aria-sort]:not([aria-sort="none"]) { color:var(--ink); }
+  tbody tr { border-bottom:1px solid var(--grid); }
+  tbody tr:hover { background:var(--plane); }
+  td.name { font-weight:560; }
+  td.num.neg, .neg-text { color:var(--neg); }
+  .side {
+    font-size:10px; font-weight:620; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--ink-2);
   }
-  .row-label { font-size:10px; color:var(--text3); letter-spacing:1px; text-transform:uppercase; }
-  .row-val { font-size:13px; font-weight:600; }
-  .attrib { padding:16px; display:flex; flex-direction:column; gap:12px; }
-  .attrib-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
-  .attrib-name { font-size:11px; color:var(--text2); }
-  .attrib-val { font-size:12px; font-weight:600; }
-  .bar-bg { height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
-  .bar { height:100%; border-radius:3px; }
+  .side::before {
+    content:''; display:inline-block; width:6px; height:6px; margin-right:5px;
+    vertical-align:1px; background:var(--muted);
+  }
+  .side.long::before { background:var(--series-1); }
+  .side.short::before { background:var(--series-2); }
+
+  /* ── two-column band ──────────────────────────────────────── */
+  .band { display:grid; grid-template-columns:1.35fr 1fr; gap:38px; }
+  @media (max-width:980px) { .band { grid-template-columns:1fr; gap:30px; } }
+  .kv { border-top:1px solid var(--grid); }
+  .kv-row {
+    display:flex; justify-content:space-between; align-items:baseline; gap:16px;
+    padding:8px 0; border-bottom:1px solid var(--grid); font-size:13px;
+  }
+  .kv-key { color:var(--ink-2); }
+  .kv-val { font-weight:600; font-variant-numeric:tabular-nums; }
+  .capm-block { border-top:1px solid var(--grid); padding:12px 0; border-bottom:1px solid var(--grid); }
+  .capm-head { display:flex; justify-content:space-between; align-items:baseline; gap:14px; }
+  .capm-name { font-size:13px; font-weight:640; }
+  .capm-alpha { font-size:15px; font-weight:640; font-variant-numeric:tabular-nums; }
+  .capm-detail { font-size:11.5px; color:var(--ink-2); margin-top:5px; font-variant-numeric:tabular-nums; }
+
+  /* ── sector bars ──────────────────────────────────────────── */
+  .sector-row { padding:9px 0; border-bottom:1px solid var(--grid); }
+  .sector-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:6px; }
+  .sector-name { font-size:12.5px; }
+  .sector-val { font-size:12.5px; font-weight:620; font-variant-numeric:tabular-nums; }
+  .sector-track { height:6px; background:var(--plane); position:relative; }
+  .sector-fill { position:absolute; top:0; bottom:0; }
+
+  /* ── footer ───────────────────────────────────────────────── */
   footer {
-    padding:16px 32px; border-top:1px solid var(--border); background:var(--bg2);
-    font-size:10px; color:var(--text3); line-height:1.8;
+    margin-top:44px; padding-top:18px; padding-bottom:44px;
+    border-top:2px solid var(--rule-strong);
+    font-size:11.5px; color:var(--muted); line-height:1.75;
   }
-  code { background:var(--bg); padding:1px 5px; border-radius:3px; color:var(--text2); }
+  footer strong { color:var(--ink-2); font-weight:600; }
+  .visually-hidden {
+    position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+  }
 </style>
 </head>
 <body>
+<div class="sheet">
 
-<header>
-  <div>
-    <div class="logo-text">Trade<span>Metrics</span></div>
-    <div class="logo-sub">Portfolio Analytics Engine</div>
-  </div>
-  <div style="text-align:right">
-    <div class="data-badge">SYNTHETIC SAMPLE DATA</div>
-    <div class="meta-line" id="metaLine"></div>
-  </div>
-</header>
+  <div class="pad">
+    <header class="masthead">
+      <div>
+        <div class="wordmark">TradeMetrics <em>— engine output</em></div>
+        <div class="tagline">Portfolio analytics engine · verification report</div>
+        <div class="kicker">Synthetic sample data — not trading results</div>
+      </div>
+      <dl class="masthead-meta">
+        <dt>Period</dt><dd id="mPeriod"></dd>
+        <dt>Risk-free rate</dt><dd id="mRf"></dd>
+        <dt>Observations</dt><dd id="mObs"></dd>
+        <dt>Generator seed</dt><dd id="mSeed"></dd>
+      </dl>
+    </header>
 
-<main>
+    <div class="standfirst">
+      <p><strong>What this page is.</strong> Engine output computed from the committed
+      synthetic sample data in <code>data/samples/</code>, generated by
+      <code>python -m trademetrics.demo</code> and rendered by
+      <code>python tools/build_dashboard.py</code>. Every figure traces to
+      <code>outputs/results.json</code> — nothing here is hardcoded.</p>
+      <p><strong>These are not real trading results.</strong> No personal account data
+      appears anywhere in this repository. The sample portfolio exists to exercise every
+      code path in the engine — long and short positions, partial fills, multi-lot FIFO
+      ordering, commissions — not to demonstrate performance. Its Sharpe ratio is a
+      property of one arbitrary random seed.</p>
+      <p>The Sharpe ratio is shown with its 95% confidence interval throughout. Over a
+      single year that interval is wide enough to contain zero, which is the honest
+      reading of any one-year Sharpe and the reason this repository publishes no
+      personal performance figure.</p>
+    </div>
 
-  <div class="notice">
-    <strong>What this page is.</strong> Engine output computed from the committed synthetic
-    sample data in <code>data/samples/</code>, generated by
-    <code>python -m trademetrics.demo</code> and rendered by
-    <code>python tools/build_dashboard.py</code>. Every figure traces to
-    <code>outputs/results.json</code> — nothing on this page is hardcoded.
-    <strong>These are not real trading results</strong>, and no personal account data
-    is present anywhere in this repository. The purpose of the sample portfolio is to
-    exercise the engine, not to demonstrate performance. Sharpe is shown with its
-    95% confidence interval because, over a single simulated year, the interval is wide
-    enough to contain zero — which is the point.
-  </div>
+    <!-- KEY FIGURES -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Key figures</h2>
+        <span class="note">computed from the daily NAV series</span>
+      </div>
+      <div class="figures" id="figures"></div>
+    </section>
 
-  <div class="kpi-row" id="kpiRow"></div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Cumulative Performance <span>growth of 100</span></div>
-        <div class="legend">
-          <div class="leg-item"><div class="leg-line" style="background:var(--accent)"></div>Portfolio</div>
-          <div class="leg-item"><div class="leg-line" style="background:var(--accent2)"></div>SPY</div>
-          <div class="leg-item"><div class="leg-line" style="background:var(--accent3)"></div>QQQ</div>
+    <!-- PERFORMANCE -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Performance</h2>
+        <span class="note">hover any chart for exact values</span>
+      </div>
+      <div class="chart-grid">
+        <div>
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Cumulative performance</div>
+              <div class="chart-sub">Growth of 100, portfolio versus benchmarks</div>
+            </div>
+            <div class="legend" id="perfLegend"></div>
+          </div>
+          <div class="chart-wrap"><div id="perfChart"></div></div>
+        </div>
+        <div>
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Monthly returns</div>
+              <div class="chart-sub">Portfolio NAV return by calendar month</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><div id="monthChart"></div></div>
         </div>
       </div>
-      <div class="chart-body"><div id="perfChart"></div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Monthly Returns</div>
-        <div class="card-badge" id="monthBadge"></div>
-      </div>
-      <div class="chart-body"><div id="monthChart"></div></div>
-    </div>
-  </div>
+    </section>
 
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Drawdown <span>from running peak</span></div>
-        <div class="card-badge" id="ddBadge"></div>
+    <!-- RISK -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Risk</h2>
+        <span class="note">drawdown from running peak · one-day value at risk</span>
       </div>
-      <div class="chart-body"><div id="ddChart"></div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Risk Metrics</div>
-        <div class="card-badge">one-day VaR</div>
+      <div class="chart-grid">
+        <div>
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Drawdown</div>
+              <div class="chart-sub" id="ddSub"></div>
+            </div>
+          </div>
+          <div class="chart-wrap"><div id="ddChart"></div></div>
+        </div>
+        <div>
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Risk measures</div>
+              <div class="chart-sub">Parametric assumes normality; historical does not</div>
+            </div>
+          </div>
+          <div class="kv" id="riskRows"></div>
+        </div>
       </div>
-      <div class="rows" id="riskRows"></div>
-    </div>
-  </div>
+    </section>
 
-  <div class="grid-2b">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Realised FIFO P&amp;L <span>net of commissions</span></div>
-        <div class="card-badge" id="tradeBadge"></div>
+    <!-- ATTRIBUTION -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Attribution</h2>
+        <span class="note">realised FIFO profit and loss, net of commissions</span>
       </div>
-      <div class="table-wrap">
-        <table id="tradeTable">
-          <thead><tr id="tradeHead"></tr></thead>
-          <tbody id="tradeBody"></tbody>
+      <div class="band">
+        <div>
+          <div class="table-scroll">
+            <table id="tradeTable">
+              <caption id="tradeCaption"></caption>
+              <thead><tr id="tradeHead"></tr></thead>
+              <tbody id="tradeBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">By sector</div>
+              <div class="chart-sub">Realised profit and loss</div>
+            </div>
+          </div>
+          <div id="sectorList"></div>
+
+          <div class="chart-head" style="margin-top:26px">
+            <div>
+              <div class="chart-title">CAPM decomposition</div>
+              <div class="chart-sub">Excess-return regression versus each benchmark</div>
+            </div>
+          </div>
+          <div id="capmRows"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPEN POSITIONS -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Open positions</h2>
+        <span class="note">lots remaining after all executions</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr id="openHead"></tr></thead>
+          <tbody id="openBody"></tbody>
         </table>
       </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:16px;">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">P&amp;L by Sector <span>realised</span></div>
-        </div>
-        <div class="attrib" id="attribList"></div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">CAPM Decomposition <span>excess returns</span></div>
-        </div>
-        <div class="rows" id="capmRows"></div>
-      </div>
-    </div>
+    </section>
+
+    <footer id="footer"></footer>
   </div>
+</div>
 
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Open Positions <span>at period end</span></div>
-      <div class="card-badge" id="openBadge"></div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr id="openHead"></tr></thead>
-        <tbody id="openBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-</main>
-
-<footer id="footer"></footer>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
 
 <script id="engine-results" type="application/json">{"meta":{"data":"synthetic sample (data/samples/, generated by tools/make_sample_data.py)","period":"2024-01-02 to 2024-12-31","rf_ann":0.02,"generator_seed":42},"summary":{"total_return":-0.06456695843724258,"annualised_return":-0.06264387227643464,"annualised_volatility":0.16205455795811066,"sharpe":-0.4419854955052903,"sharpe_se":0.9846859624131609,"sharpe_ci_low":-2.371934517917247,"sharpe_ci_high":1.4879635269066664,"n_obs":260,"sortino":-0.6309027110982057,"calmar":-0.35944274351690914,"max_drawdown":-0.17428053120089684,"var_95_parametric":0.016996315548540815,"var_95_historical":0.016636622206388015,"var_99_parametric":0.02395333430418398,"var_99_historical":0.020333212023654536,"rf":0.02,"win_rate":0.6153846153846154,"profit_factor":5.858032009484291,"avg_holding_days":169.0,"n_round_trips":13},"benchmarks":[{"benchmark":"SPY","capm_alpha_ann":-0.05346673798227609,"alpha_ci_low":-0.2111028981749002,"alpha_ci_high":0.10416942221034803,"beta":1.2455797755313514,"r_squared":0.7468623895220033,"info_ratio":-0.6626986256048999,"correlation":0.8642120049629045},{"benchmark":"QQQ","capm_alpha_ann":-0.07478537115231941,"alpha_ci_low":-0.2655190760332745,"alpha_ci_high":0.11594833372863568,"beta":0.8959510456970347,"r_squared":0.6293808031962573,"info_ratio":-0.7531818853000493,"correlation":0.7933352401073943}],"series":{"dates":["2024-01-03","2024-01-04","2024-01-05","2024-01-08","2024-01-09","2024-01-10","2024-01-11","2024-01-12","2024-01-15","2024-01-16","2024-01-17","2024-01-18","2024-01-19","2024-01-22","2024-01-23","2024-01-24","2024-01-25","2024-01-26","2024-01-29","2024-01-30","2024-01-31","2024-02-01","2024-02-02","2024-02-05","2024-02-06","2024-02-07","2024-02-08","2024-02-09","2024-02-12","2024-02-13","2024-02-14","2024-02-15","2024-02-16","2024-02-19","2024-02-20","2024-02-21","2024-02-22","2024-02-23","2024-02-26","2024-02-27","2024-02-28","2024-02-29","2024-03-01","2024-03-04","2024-03-05","2024-03-06","2024-03-07","2024-03-08","2024-03-11","2024-03-12","2024-03-13","2024-03-14","2024-03-15","2024-03-18","2024-03-19","2024-03-20","2024-03-21","2024-03-22","2024-03-25","2024-03-26","2024-03-27","2024-03-28","2024-03-29","2024-04-01","2024-04-02","2024-04-03","2024-04-04","2024-04-05","2024-04-08","2024-04-09","2024-04-10","2024-04-11","2024-04-12","2024-04-15","2024-04-16","2024-04-17","2024-04-18","2024-04-19","2024-04-22","2024-04-23","2024-04-24","2024-04-25","2024-04-26","2024-04-29","2024-04-30","2024-05-01","2024-05-02","2024-05-03","2024-05-06","2024-05-07","2024-05-08","2024-05-09","2024-05-10","2024-05-13","2024-05-14","2024-05-15","2024-05-16","2024-05-17","2024-05-20","2024-05-21","2024-05-22","2024-05-23","2024-05-24","2024-05-27","2024-05-28","2024-05-29","2024-05-30","2024-05-31","2024-06-03","2024-06-04","2024-06-05","2024-06-06","2024-06-07","2024-06-10","2024-06-11","2024-06-12","2024-06-13","2024-06-14","2024-06-17","2024-06-18","2024-06-19","2024-06-20","2024-06-21","2024-06-24","2024-06-25","2024-06-26","2024-06-27","2024-06-28","2024-07-01","2024-07-02","2024-07-03","2024-07-04","2024-07-05","2024-07-08","2024-07-09","2024-07-10","2024-07-11","2024-07-12","2024-07-15","2024-07-16","2024-07-17","2024-07-18","2024-07-19","2024-07-22","2024-07-23","2024-07-24","2024-07-25","2024-07-26","2024-07-29","2024-07-30","2024-07-31","2024-08-01","2024-08-02","2024-08-05","2024-08-06","2024-08-07","2024-08-08","2024-08-09","2024-08-12","2024-08-13","2024-08-14","2024-08-15","2024-08-16","2024-08-19","2024-08-20","2024-08-21","2024-08-22","2024-08-23","2024-08-26","2024-08-27","2024-08-28","2024-08-29","2024-08-30","2024-09-02","2024-09-03","2024-09-04","2024-09-05","2024-09-06","2024-09-09","2024-09-10","2024-09-11","2024-09-12","2024-09-13","2024-09-16","2024-09-17","2024-09-18","2024-09-19","2024-09-20","2024-09-23","2024-09-24","2024-09-25","2024-09-26","2024-09-27","2024-09-30","2024-10-01","2024-10-02","2024-10-03","2024-10-04","2024-10-07","2024-10-08","2024-10-09","2024-10-10","2024-10-11","2024-10-14","2024-10-15","2024-10-16","2024-10-17","2024-10-18","2024-10-21","2024-10-22","2024-10-23","2024-10-24","2024-10-25","2024-10-28","2024-10-29","2024-10-30","2024-10-31","2024-11-01","2024-11-04","2024-11-05","2024-11-06","2024-11-07","2024-11-08","2024-11-11","2024-11-12","2024-11-13","2024-11-14","2024-11-15","2024-11-18","2024-11-19","2024-11-20","2024-11-21","2024-11-22","2024-11-25","2024-11-26","2024-11-27","2024-11-28","2024-11-29","2024-12-02","2024-12-03","2024-12-04","2024-12-05","2024-12-06","2024-12-09","2024-12-10","2024-12-11","2024-12-12","2024-12-13","2024-12-16","2024-12-17","2024-12-18","2024-12-19","2024-12-20","2024-12-23","2024-12-24","2024-12-25","2024-12-26","2024-12-27","2024-12-30","2024-12-31"],"portfolio_indexed":[98.9427,100.4328,101.1985,100.0622,98.9091,99.2226,99.7572,99.6198,98.3732,99.061,100.1046,99.4408,100.9226,101.1739,100.9666,100.1759,98.8961,98.9697,98.5696,98.5738,97.8854,98.9962,98.8269,98.5726,97.7908,98.7105,99.4549,100.112,100.8778,103.2133,103.9227,103.4174,102.4935,102.7874,103.4559,102.7544,101.5086,100.712,101.5872,102.4174,102.6315,102.4886,103.167,103.2653,103.2106,104.4428,104.835,104.8334,104.9312,105.432,105.6725,104.325,103.2962,103.5774,103.6418,103.293,105.0628,102.9571,103.3997,101.5998,100.7786,101.3642,103.0304,103.2025,103.6346,103.4657,103.8989,104.1984,104.197,103.9108,101.9521,100.435,100.7727,100.7109,101.8682,101.6268,100.9382,101.8826,101.3386,102.5063,101.578,100.9518,100.91,100.1738,100.9406,99.6792,100.0227,100.035,100.6537,100.6511,100.8417,100.0739,99.4098,98.1798,96.9631,95.462,95.283,95.5039,94.7279,94.5622,95.532,95.4827,95.9764,94.9554,95.4738,94.1401,92.7393,94.3147,93.9831,94.2498,93.6077,92.9719,91.5734,91.6066,90.6719,91.1995,91.5159,92.3231,92.4877,92.5707,92.8706,92.9702,94.2023,95.325,94.8862,96.3873,95.1305,95.4764,94.5816,95.0721,93.3151,94.2308,94.2343,92.5171,91.733,92.6322,93.3007,94.3929,97.1451,97.1583,96.1053,94.1109,93.607,92.1543,92.0583,91.3183,90.0675,91.4223,91.7447,91.3277,89.848,88.8027,88.5889,89.6599,91.4623,91.814,92.6796,92.6629,91.9324,91.6966,90.8583,92.6149,91.7003,92.8773,92.8113,93.5031,93.7138,93.7751,93.6787,93.5827,92.9881,92.2418,90.8235,88.6763,88.4503,89.4689,89.5736,90.0263,90.223,90.9674,91.193,91.3626,91.9624,91.9841,93.6874,93.8088,93.0434,91.8429,93.7138,94.8696,94.7545,94.355,95.1896,93.4621,93.0205,93.5009,92.7138,92.7208,93.1556,92.4509,93.0888,92.7956,94.1228,92.4181,92.7877,91.5423,89.9854,89.4669,89.2541,90.3588,89.1508,89.3571,89.0577,89.1744,90.4703,90.2655,90.4847,90.8594,90.8374,90.2259,89.6503,89.9055,89.4241,90.3683,90.8614,92.9945,94.348,93.62,93.2716,91.5101,91.9797,93.1486,94.8426,93.781,93.6395,92.0226,92.137,91.8116,91.684,91.2919,91.5562,90.1879,88.1321,90.0672,88.7303,87.2559,89.6238,93.0181,92.6412,92.4817,93.4781,95.129,94.3618,93.672,94.6322,95.1231,94.2052,94.1146,92.8627,93.5433],"spy_indexed":[99.2531,99.8557,100.6047,99.1618,98.2239,98.3576,98.1624,98.19,97.5959,98.2834,98.8987,98.9878,99.8706,100.2631,99.652,99.9682,99.2849,99.983,99.9851,99.8854,99.4101,100.3692,100.2907,100.0064,99.7793,100.2207,100.5368,100.8912,101.2583,102.9389,102.663,102.3065,101.7188,102.2323,103.1447,103.098,102.4827,101.8843,102.4275,103.0428,103.5075,103.028,103.2487,103.3802,103.5924,104.316,104.5346,105.1117,105.2072,105.4788,106.0241,104.8974,104.6873,104.3563,103.8937,103.7176,104.9314,104.2863,105.0905,103.7961,103.5754,103.7431,104.2439,104.8465,105.517,105.2794,104.9547,105.6762,105.5658,104.5897,103.7346,103.0556,103.4821,103.6349,104.2184,103.9213,104.089,104.6216,104.4178,104.821,104.3372,104.0932,103.8343,102.9367,103.3548,103.0301,103.081,103.4969,103.8874,104.4497,104.4136,104.1208,104.0996,102.8137,101.7294,100.7533,100.034,100.3756,99.7284,99.4823,100.4987,100.2674,100.8679,100.1952,100.0785,99.3995,99.1852,99.8536,98.591,98.9539,99.1703,98.765,97.7232,97.8165,97.4622,97.6722,97.7274,98.9496,98.8096,98.086,98.2579,98.4595,99.5098,100.1782,100.488,101.6402,100.766,100.3183,99.6562,99.4016,98.4064,98.9178,98.7905,97.7317,97.0208,97.2903,97.9439,99.461,101.6912,102.0498,101.3283,99.7348,99.9767,99.4016,99.13,98.7099,98.6441,99.478,99.635,99.5544,98.816,97.6043,97.2839,97.2818,98.6207,98.7587,99.5311,99.1937,98.3449,97.6659,97.1694,98.7714,98.1985,98.8584,98.2239,98.9539,99.2828,99.2043,99.2128,98.7608,99.1321,98.8308,97.9545,97.0484,97.2118,98.4107,98.5698,98.521,98.7714,99.7857,99.9915,99.7199,100.5941,100.9612,102.1729,102.3553,101.4472,100.4392,101.7315,103.098,102.9983,102.7415,103.9171,103.0895,102.4317,102.9707,102.7055,102.7415,102.6567,102.958,104.0953,104.2078,104.7552,103.1744,103.1765,102.5612,101.6551,101.0206,100.8063,101.5448,100.5666,100.6302,100.3013,100.0934,100.8912,101.3411,102.4063,102.3278,101.8291,101.6975,101.9246,102.1007,101.305,101.4132,101.6296,103.603,105.1138,104.4794,104.2927,103.1808,102.7606,103.0471,104.0274,103.4948,103.0237,101.392,101.3092,100.5347,100.1719,99.548,99.5162,98.2346,97.1842,98.7863,97.8632,97.0908,98.4786,100.679,99.8281,99.5905,99.8875,101.2307,100.5156,100.3692,100.9994,101.3708,101.1246,101.061,100.0509,99.9109],"qqq_indexed":[99.2291,99.7131,100.7509,99.4711,98.4482,98.7326,98.5256,98.553,97.5975,98.5031,99.1767,100.0624,101.684,102.2902,101.2773,101.22,100.8782,101.7938,101.9784,101.1875,100.988,102.2803,101.7589,101.2424,101.0803,101.6117,101.8686,102.2379,102.5697,104.5855,104.8425,103.4054,102.627,103.2907,104.4657,104.2637,102.8541,102.2902,103.5826,103.6973,104.573,103.8844,104.1165,103.852,103.9643,105.309,105.793,107.1576,107.7439,108.2429,109.5976,108.44,108.5273,108.0084,107.4845,106.993,108.8292,107.5743,108.8466,107.2225,107.4346,107.9385,109.2782,110.3061,110.4608,110.1464,109.2633,109.9144,110.4084,109.4978,108.178,106.9481,107.472,107.1576,107.5768,107.3522,108.0159,108.899,107.7115,108.3128,107.7664,107.6416,107.9909,106.0749,106.3344,106.1847,105.6084,106.6861,107.2949,108.3078,108.0283,108.0109,108.42,106.9755,105.7705,104.7102,103.5077,103.8545,103.0237,102.879,104.4757,103.7822,104.4433,104.2262,103.7946,102.662,102.4823,103.605,102.0981,103.0437,103.635,103.4753,102.4374,103.4478,102.9389,102.4125,103.0986,104.4009,104.2736,103.9069,103.4878,103.2408,103.8819,104.3709,104.9148,106.504,105.561,104.4582,102.7493,102.4699,101.1052,101.8836,102.0033,100.7983,100.242,100.6462,101.6266,103.1634,105.7531,106.2595,105.7231,103.6524,104.1439,103.3505,102.9763,102.7967,101.9435,102.4325,102.0458,101.0503,99.9252,98.7975,98.3185,98.3908,100.3518,101.0129,101.8936,102.0183,101.0478,99.9252,99.1143,100.4391,99.4287,100.0624,99.6258,101.1252,100.9805,101.0378,100.6487,100.3019,100.6861,99.6358,98.9671,97.6848,97.6798,98.6678,98.6054,98.7077,98.9247,100.2146,100.5888,100.7759,101.6591,101.5169,103.3256,103.4054,102.7867,101.7589,103.2158,104.9422,105.6009,106.1248,107.5468,106.6263,106.277,106.5788,106.3942,106.4267,106.4491,106.4741,107.1851,106.4766,106.6712,104.6304,104.5181,104.563,103.9393,102.8142,102.6969,103.4004,102.1431,102.2878,102.1431,101.7663,103.1085,103.1909,104.4383,105.3689,104.8674,105.279,105.5834,106.025,105.0495,105.1119,105.057,107.5743,109.0313,108.5448,108.7668,107.5818,106.9606,107.4845,108.5348,108.2778,106.9606,104.8774,103.9867,102.4848,102.5871,102.1979,101.8811,99.7904,97.4453,99.0919,98.9322,98.1962,99.6008,102.3352,100.7335,100.3443,100.7235,102.2503,101.7239,101.684,102.672,102.8391,102.899,103.4578,101.8886,101.3796],"drawdown":[-0.010573,0.0,0.0,-0.011229,-0.022623,-0.019525,-0.014242,-0.015599,-0.027919,-0.021122,-0.01081,-0.017369,-0.002726,-0.000243,-0.002291,-0.010104,-0.022751,-0.022024,-0.025978,-0.025936,-0.032739,-0.021762,-0.023435,-0.025948,-0.033673,-0.024586,-0.017229,-0.010736,-0.003168,0.0,0.0,-0.004862,-0.013752,-0.010924,-0.004492,-0.011241,-0.02323,-0.030895,-0.022474,-0.014485,-0.012424,-0.013799,-0.007272,-0.006326,-0.006852,0.0,0.0,-1.5e-05,0.0,0.0,0.0,-0.012752,-0.022488,-0.019827,-0.019217,-0.022518,-0.00577,-0.025697,-0.021508,-0.038541,-0.046312,-0.040771,-0.025003,-0.023374,-0.019285,-0.020883,-0.016784,-0.01395,-0.013963,-0.016672,-0.035207,-0.049564,-0.046368,-0.046953,-0.036001,-0.038285,-0.044802,-0.035865,-0.041012,-0.029963,-0.038748,-0.044673,-0.045068,-0.052035,-0.044779,-0.056716,-0.053466,-0.053349,-0.047494,-0.047518,-0.045715,-0.052981,-0.059266,-0.070905,-0.082419,-0.096624,-0.098318,-0.096228,-0.103571,-0.105139,-0.095962,-0.096428,-0.091756,-0.101418,-0.096513,-0.109133,-0.122389,-0.107481,-0.110619,-0.108095,-0.114172,-0.120189,-0.133423,-0.133109,-0.141954,-0.136961,-0.133967,-0.126328,-0.124771,-0.123985,-0.121147,-0.120204,-0.108545,-0.09792,-0.102073,-0.087868,-0.099761,-0.096488,-0.104955,-0.100314,-0.11694,-0.108275,-0.108242,-0.124492,-0.131912,-0.123403,-0.117077,-0.106741,-0.080697,-0.080572,-0.090537,-0.10941,-0.114178,-0.127926,-0.128834,-0.135836,-0.147673,-0.134853,-0.131801,-0.135748,-0.149751,-0.159642,-0.161666,-0.15153,-0.134474,-0.131146,-0.122955,-0.123112,-0.130025,-0.132257,-0.14019,-0.123567,-0.132222,-0.121083,-0.121708,-0.115162,-0.113168,-0.112587,-0.113499,-0.114409,-0.120035,-0.127098,-0.14052,-0.160839,-0.162978,-0.153338,-0.152347,-0.148063,-0.146202,-0.139157,-0.137023,-0.135417,-0.129742,-0.129537,-0.113417,-0.112269,-0.119512,-0.130873,-0.113168,-0.10223,-0.10332,-0.1071,-0.099202,-0.115549,-0.119729,-0.115183,-0.122631,-0.122565,-0.11845,-0.125119,-0.119082,-0.121857,-0.109297,-0.125429,-0.121932,-0.133717,-0.14845,-0.153357,-0.155371,-0.144917,-0.156348,-0.154396,-0.157229,-0.156125,-0.143861,-0.1458,-0.143725,-0.140179,-0.140388,-0.146175,-0.151621,-0.149207,-0.153762,-0.144827,-0.140161,-0.119974,-0.107166,-0.114055,-0.117352,-0.134022,-0.129578,-0.118516,-0.102485,-0.112532,-0.113871,-0.129172,-0.128089,-0.131169,-0.132376,-0.136087,-0.133586,-0.146534,-0.165988,-0.147676,-0.160328,-0.174281,-0.151872,-0.119751,-0.123318,-0.124827,-0.115398,-0.099776,-0.107036,-0.113564,-0.104477,-0.099831,-0.108518,-0.109375,-0.121222,-0.114781]},"monthly_returns":{"labels":["Jan 24","Feb 24","Mar 24","Apr 24","May 24","Jun 24","Jul 24","Aug 24","Sep 24","Oct 24","Nov 24","Dec 24"],"portfolio":[-2.115,4.703,0.529,-2.028,-6.564,1.232,-5.895,1.086,2.905,-3.186,1.466,1.886]},"realised_by_ticker":[{"ticker":"MSFT","net_pnl":1506.0,"commission":2.5,"trades":2,"sector":"Software"},{"ticker":"ORCL","net_pnl":1486.0,"commission":2.0,"trades":1,"sector":"Software"},{"ticker":"NVDA","net_pnl":1110.5,"commission":1.5,"trades":1,"sector":"Semiconductors"},{"ticker":"PLTR","net_pnl":730.5,"commission":1.5,"trades":1,"sector":"Software"},{"ticker":"META","net_pnl":663.5,"commission":1.5,"trades":1,"sector":"Consumer Internet"},{"ticker":"CRM","net_pnl":308.5,"commission":1.5,"trades":1,"sector":"Software"},{"ticker":"AMZN","net_pnl":124.5,"commission":1.5,"trades":1,"sector":"Consumer Internet"},{"ticker":"GOOGL","net_pnl":-26.0,"commission":2.0,"trades":1,"sector":"Consumer Internet"},{"ticker":"SPY","net_pnl":-169.6,"commission":1.6,"trades":1,"sector":"Index Hedge"},{"ticker":"AMD","net_pnl":-361.6,"commission":1.6,"trades":1,"sector":"Semiconductors"},{"ticker":"TSLA","net_pnl":-455.0,"commission":3.0,"trades":2,"sector":"Consumer Tech"}],"pnl_by_sector":[{"sector":"Software","net_pnl":4031.0},{"sector":"Consumer Internet","net_pnl":762.0},{"sector":"Semiconductors","net_pnl":748.9},{"sector":"Index Hedge","net_pnl":-169.6},{"sector":"Consumer Tech","net_pnl":-455.0}],"realised_trades":[{"ticker":"MSFT","direction":"LONG","qty":20.0,"entry_date":"2024-01-15","entry_price":375.2,"exit_date":"2024-06-17","exit_price":441.0,"gross_pnl":1316.0,"commission":1.8,"net_pnl":1314.2},{"ticker":"MSFT","direction":"LONG","qty":5.0,"entry_date":"2024-03-11","entry_price":402.5,"exit_date":"2024-06-17","exit_price":441.0,"gross_pnl":192.5,"commission":0.7,"net_pnl":191.8},{"ticker":"AMD","direction":"LONG","qty":15.0,"entry_date":"2024-03-04","entry_price":172.0,"exit_date":"2024-07-08","exit_price":148.0,"gross_pnl":-360.0,"commission":1.6,"net_pnl":-361.6},{"ticker":"TSLA","direction":"LONG","qty":12.0,"entry_date":"2024-05-20","entry_price":241.0,"exit_date":"2024-08-05","exit_price":210.0,"gross_pnl":-372.0,"commission":1.6,"net_pnl":-373.6},{"ticker":"NVDA","direction":"LONG","qty":4.0,"entry_date":"2024-01-22","entry_price":612.0,"exit_date":"2024-08-19","exit_price":890.0,"gross_pnl":1112.0,"commission":1.5,"net_pnl":1110.5},{"ticker":"SPY","direction":"SHORT","qty":6.0,"entry_date":"2024-06-03","entry_price":521.0,"exit_date":"2024-09-09","exit_price":549.0,"gross_pnl":-168.0,"commission":1.6,"net_pnl":-169.6},{"ticker":"PLTR","direction":"LONG","qty":40.0,"entry_date":"2024-03-25","entry_price":18.2,"exit_date":"2024-09-23","exit_price":36.5,"gross_pnl":732.0,"commission":1.5,"net_pnl":730.5},{"ticker":"META","direction":"LONG","qty":7.0,"entry_date":"2024-02-20","entry_price":488.0,"exit_date":"2024-10-07","exit_price":583.0,"gross_pnl":665.0,"commission":1.5,"net_pnl":663.5},{"ticker":"TSLA","direction":"SHORT","qty":8.0,"entry_date":"2024-08-05","entry_price":210.0,"exit_date":"2024-10-21","exit_price":220.0,"gross_pnl":-80.0,"commission":1.4,"net_pnl":-81.4},{"ticker":"CRM","direction":"LONG","qty":10.0,"entry_date":"2024-05-06","entry_price":298.0,"exit_date":"2024-11-04","exit_price":329.0,"gross_pnl":310.0,"commission":1.5,"net_pnl":308.5},{"ticker":"GOOGL","direction":"LONG","qty":16.0,"entry_date":"2024-04-08","entry_price":174.0,"exit_date":"2024-11-18","exit_price":172.5,"gross_pnl":-24.0,"commission":2.0,"net_pnl":-26.0},{"ticker":"AMZN","direction":"LONG","qty":9.0,"entry_date":"2024-04-22","entry_price":193.0,"exit_date":"2024-12-02","exit_price":207.0,"gross_pnl":126.0,"commission":1.5,"net_pnl":124.5},{"ticker":"ORCL","direction":"LONG","qty":30.0,"entry_date":"2024-02-05","entry_price":118.4,"exit_date":"2024-12-16","exit_price":168.0,"gross_pnl":1488.0,"commission":2.0,"net_pnl":1486.0}],"open_positions":[{"ticker":"MSFT","direction":"LONG","qty":5.0,"entry_date":"2024-03-11","entry_price":402.5,"entry_commission":0.5},{"ticker":"NVDA","direction":"LONG","qty":4.0,"entry_date":"2024-01-22","entry_price":612.0,"entry_commission":0.5},{"ticker":"META","direction":"LONG","qty":7.0,"entry_date":"2024-02-20","entry_price":488.0,"entry_commission":0.5},{"ticker":"AMD","direction":"LONG","qty":10.0,"entry_date":"2024-03-04","entry_price":172.0,"entry_commission":0.4},{"ticker":"PLTR","direction":"LONG","qty":40.0,"entry_date":"2024-03-25","entry_price":18.2,"entry_commission":0.5},{"ticker":"AMZN","direction":"LONG","qty":9.0,"entry_date":"2024-04-22","entry_price":193.0,"entry_commission":0.5},{"ticker":"CRM","direction":"LONG","qty":10.0,"entry_date":"2024-05-06","entry_price":298.0,"entry_commission":0.5},{"ticker":"SPY","direction":"SHORT","qty":4.0,"entry_date":"2024-06-03","entry_price":521.0,"entry_commission":0.4}],"sizing_example":{"ticker":"NVDA","kelly_fraction":0.09999999999999999,"vol_target":0.075,"recommended":0.06,"allocation":1417.6542,"max_loss_at_risk_cap":354.41355}}</script>
 <script>
 const R = JSON.parse(document.getElementById('engine-results').textContent);
-
-// ── formatting helpers ────────────────────────────────────────────────────
-const pct  = (x, d=2) => (x*100).toFixed(d) + '%';
-const spct = (x, d=2) => (x>=0?'+':'') + (x*100).toFixed(d) + '%';
-const num  = (x, d=2) => x.toFixed(d);
-const money = x => (x<0?'-':'') + Math.abs(x).toLocaleString('en-US',
-  {minimumFractionDigits:2, maximumFractionDigits:2});
-
 const S = R.summary;
 
-// ── header meta ───────────────────────────────────────────────────────────
-document.getElementById('metaLine').textContent =
-  R.meta.period + '  ·  rf ' + pct(R.meta.rf_ann,1) + '  ·  seed ' + R.meta.generator_seed;
+const CSS = getComputedStyle(document.documentElement);
+const C = n => CSS.getPropertyValue(n).trim();
+const SERIES = [C('--series-1'), C('--series-2'), C('--series-3')];
+const POS = C('--pos'), NEG = C('--neg');
+const GRID = C('--grid'), AXIS = C('--axis'), MUTED = C('--muted');
+const INK = C('--ink'), INK2 = C('--ink-2'), SURFACE = C('--surface');
 
-// ── KPI cards ─────────────────────────────────────────────────────────────
-const kpis = [
-  { cls:'green', label:'Total Return', value:spct(S.total_return),
-    valueCls:S.total_return>=0?'up':'down',
-    sub:'annualised ' + spct(S.annualised_return) },
-  { cls:'blue', label:'Sharpe Ratio', value:num(S.sharpe), valueCls:'blue',
-    sub:'95% CI ' + num(S.sharpe_ci_low) + ' to ' + num(S.sharpe_ci_high)
-        + '<br>Lo SE ' + num(S.sharpe_se) + ' · n=' + S.n_obs },
-  { cls:'orange', label:'Sortino Ratio', value:num(S.sortino), valueCls:'orange',
-    sub:'target = daily risk-free rate' },
-  { cls:'red', label:'Max Drawdown', value:spct(S.max_drawdown), valueCls:'down',
-    sub:'peak to trough, daily NAV' },
-  { cls:'teal', label:'Annualised Vol', value:pct(S.annualised_volatility), valueCls:'',
-    sub:'Calmar ' + num(S.calmar) },
-  { cls:'gold', label:'Win Rate', value:pct(S.win_rate,1), valueCls:'gold',
-    sub:S.n_round_trips + ' round-trips · profit factor ' + num(S.profit_factor) },
+// ── formatting ────────────────────────────────────────────────────────────
+const pct  = (x,d=2) => (x*100).toFixed(d) + '%';
+const spct = (x,d=2) => (x>=0?'+':'\u2212') + Math.abs(x*100).toFixed(d) + '%';
+const num  = (x,d=2) => (x<0?'\u2212':'') + Math.abs(x).toFixed(d);
+const snum = (x,d=2) => (x>=0?'+':'\u2212') + Math.abs(x).toFixed(d);
+const money = x => (x<0?'\u2212':'') + Math.abs(x).toLocaleString('en-US',
+  {minimumFractionDigits:2, maximumFractionDigits:2});
+const smoney = x => (x>=0?'+':'\u2212') + Math.abs(x).toLocaleString('en-US',
+  {minimumFractionDigits:2, maximumFractionDigits:2});
+
+// ── masthead ──────────────────────────────────────────────────────────────
+document.getElementById('mPeriod').textContent = R.meta.period.replace(' to ', ' \u2013 ');
+document.getElementById('mRf').textContent = pct(R.meta.rf_ann, 1) + ' p.a.';
+document.getElementById('mObs').textContent = S.n_obs + ' trading days';
+document.getElementById('mSeed').textContent = R.meta.generator_seed;
+
+// ── key figures ───────────────────────────────────────────────────────────
+const figures = [
+  { label:'Total return', value:spct(S.total_return), neg:S.total_return < 0,
+    sub:'Annualised ' + spct(S.annualised_return) },
+  { label:'Sharpe ratio', value:snum(S.sharpe), neg:S.sharpe < 0,
+    sub:'95% CI ' + snum(S.sharpe_ci_low) + ' to ' + snum(S.sharpe_ci_high)
+        + '<br>Lo (2002) SE ' + num(S.sharpe_se) },
+  { label:'Sortino ratio', value:snum(S.sortino), neg:S.sortino < 0,
+    sub:'Target = daily risk-free rate' },
+  { label:'Max drawdown', value:spct(S.max_drawdown), neg:true,
+    sub:'Peak to trough, daily NAV' },
+  { label:'Annualised vol', value:pct(S.annualised_volatility), neg:false,
+    sub:'Calmar ' + snum(S.calmar) },
+  { label:'Win rate', value:pct(S.win_rate,1), neg:false,
+    sub:S.n_round_trips + ' round-trips<br>Profit factor ' + num(S.profit_factor) },
 ];
-document.getElementById('kpiRow').innerHTML = kpis.map(k => `
-  <div class="kpi-card ${k.cls}">
-    <div class="kpi-label">${k.label}</div>
-    <div class="kpi-value ${k.valueCls}">${k.value}</div>
-    <div class="kpi-sub">${k.sub}</div>
+document.getElementById('figures').innerHTML = figures.map(f => `
+  <div class="figure">
+    <div class="figure-label">${f.label}</div>
+    <div class="figure-value${f.neg ? ' neg' : ''}">${f.value}</div>
+    <div class="figure-sub">${f.sub}</div>
   </div>`).join('');
 
-// ── minimal SVG chart helpers (no external library) ───────────────────────
-const SVG_NS = 'http://www.w3.org/2000/svg';
-function svgEl(tag, attrs) {
-  const el = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-  return el;
+// ── tooltip plumbing ──────────────────────────────────────────────────────
+const tip = document.getElementById('tip');
+function showTip(html, evt) {
+  tip.innerHTML = html;
+  tip.style.opacity = '1';
+  const r = tip.getBoundingClientRect();
+  let x = evt.clientX + 14, y = evt.clientY - r.height / 2;
+  if (x + r.width > window.innerWidth - 8) x = evt.clientX - r.width - 14;
+  y = Math.max(8, Math.min(y, window.innerHeight - r.height - 8));
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
 }
-function niceTicks(lo, hi, count) {
+function hideTip() { tip.style.opacity = '0'; }
+
+// ── SVG helpers ───────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+}
+function ticks(lo, hi, count) {
   const span = hi - lo || 1;
   const raw = span / count;
   const mag = Math.pow(10, Math.floor(Math.log10(raw)));
-  const step = [1,2,2.5,5,10].find(m => m*mag >= raw) * mag;
+  const step = ([1,2,2.5,5,10].find(m => m * mag >= raw) || 10) * mag;
   const out = [];
-  for (let t = Math.ceil(lo/step)*step; t <= hi + 1e-9; t += step) out.push(t);
+  for (let t = Math.ceil(lo / step) * step; t <= hi + 1e-9; t += step) out.push(t);
   return out;
 }
+function axisText(x, y, text, opts) {
+  const t = el('text', Object.assign({
+    x, y, fill:MUTED, 'font-size':11, 'font-family':'inherit',
+  }, opts || {}));
+  t.textContent = text;
+  return t;
+}
 
-function lineChart(mount, series, labels, opts) {
+/**
+ * Time-series line chart with a crosshair tooltip and direct end-labels.
+ * series: [{name, data:[], color}]
+ */
+function lineChart(mount, series, dates, opts) {
   opts = opts || {};
-  const W = 760, H = 260, P = { t:14, r:48, b:28, l:34 };
+  const W = 720, H = 300, P = { t:12, r:opts.rightPad || 58, b:30, l:opts.leftPad || 4 };
   const all = series.flatMap(s => s.data);
   let lo = Math.min(...all), hi = Math.max(...all);
-  const pad = (hi - lo) * 0.08 || 1;
+  if (opts.includeZero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  const pad = (hi - lo) * 0.10 || 1;
   lo -= pad; hi += pad;
-  const n = labels.length;
-  const x = i => P.l + (i / (n - 1)) * (W - P.l - P.r);
-  const y = v => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
+  const n = dates.length;
+  const X = i => P.l + (i / (n - 1)) * (W - P.l - P.r);
+  const Y = v => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
 
-  const svg = svgEl('svg', { viewBox:`0 0 ${W} ${H}` });
+  const svg = el('svg', { viewBox:`0 0 ${W} ${H}`, role:'img' });
 
-  niceTicks(lo, hi, 5).forEach(t => {
-    svg.appendChild(svgEl('line', {
-      x1:P.l, x2:W-P.r, y1:y(t), y2:y(t), stroke:'rgba(30,45,69,0.7)', 'stroke-width':1 }));
-    const lab = svgEl('text', {
-      x:W-P.r+6, y:y(t)+3.5, fill:'#4a6080', 'font-size':9, 'font-family':'monospace' });
-    lab.textContent = opts.fmt ? opts.fmt(t) : t.toFixed(0);
-    svg.appendChild(lab);
+  // horizontal gridlines + right-hand value axis
+  ticks(lo, hi, 5).forEach(t => {
+    const isZero = Math.abs(t) < 1e-9;
+    svg.appendChild(el('line', {
+      x1:P.l, x2:W - P.r, y1:Y(t), y2:Y(t),
+      stroke:isZero ? AXIS : GRID, 'stroke-width':1 }));
+    svg.appendChild(axisText(W - P.r + 8, Y(t) + 3.8,
+      opts.fmtAxis ? opts.fmtAxis(t) : t.toFixed(0)));
   });
 
-  const step = Math.max(1, Math.floor(n / 7));
+  // x-axis baseline + date ticks
+  svg.appendChild(el('line', {
+    x1:P.l, x2:W - P.r, y1:H - P.b, y2:H - P.b, stroke:AXIS, 'stroke-width':1 }));
+  const step = Math.max(1, Math.round((n - 1) / 6));
   for (let i = 0; i < n; i += step) {
-    const lab = svgEl('text', {
-      x:x(i), y:H-8, fill:'#4a6080', 'font-size':9,
-      'font-family':'monospace', 'text-anchor':'middle' });
-    lab.textContent = labels[i].slice(0, 7);
-    svg.appendChild(lab);
+    svg.appendChild(axisText(X(i), H - P.b + 16, dates[i].slice(0, 7),
+      { 'text-anchor':i === 0 ? 'start' : 'middle' }));
   }
 
+  // area wash (single-series charts only)
   series.forEach(s => {
-    const d = s.data.map((v,i) => `${i?'L':'M'}${x(i).toFixed(2)},${y(v).toFixed(2)}`).join('');
-    if (s.fill) {
-      const base = y(Math.max(lo, opts.fillBase !== undefined ? opts.fillBase : lo));
-      svg.appendChild(svgEl('path', {
-        d:`${d}L${x(n-1).toFixed(2)},${base}L${x(0).toFixed(2)},${base}Z`,
-        fill:s.fill, stroke:'none' }));
-    }
-    svg.appendChild(svgEl('path', {
-      d, fill:'none', stroke:s.color, 'stroke-width':s.width || 1.6,
-      'stroke-dasharray':s.dash || 'none',
-      'stroke-linejoin':'round' }));
+    if (!s.fill) return;
+    const base = Y(Math.max(lo, opts.fillBase !== undefined ? opts.fillBase : lo));
+    const d = s.data.map((v,i) => `${i ? 'L' : 'M'}${X(i).toFixed(2)},${Y(v).toFixed(2)}`).join('');
+    svg.appendChild(el('path', {
+      d:`${d}L${X(n-1).toFixed(2)},${base}L${X(0).toFixed(2)},${base}Z`,
+      fill:s.color, 'fill-opacity':0.10, stroke:'none' }));
+  });
+
+  // 2px lines
+  series.forEach(s => {
+    const d = s.data.map((v,i) => `${i ? 'L' : 'M'}${X(i).toFixed(2)},${Y(v).toFixed(2)}`).join('');
+    svg.appendChild(el('path', {
+      d, fill:'none', stroke:s.color, 'stroke-width':2,
+      'stroke-linejoin':'round', 'stroke-linecap':'round' }));
+  });
+
+  // direct end-labels (identity without relying on colour alone)
+  if (opts.endLabels !== false) {
+    const placed = [];
+    series.forEach(s => {
+      let y = Y(s.data[n - 1]);
+      while (placed.some(p => Math.abs(p - y) < 12)) y += 12;
+      placed.push(y);
+      const t = axisText(W - P.r + 8, y + 3.8, s.name,
+        { fill:INK2, 'font-size':11, 'font-weight':600 });
+      svg.appendChild(t);
+    });
+  }
+
+  // crosshair + hover layer
+  const cross = el('line', {
+    y1:P.t, y2:H - P.b, stroke:AXIS, 'stroke-width':1, opacity:0 });
+  svg.appendChild(cross);
+  const dots = series.map(s => {
+    const g = el('circle', {
+      r:4, fill:s.color, stroke:SURFACE, 'stroke-width':2, opacity:0 });
+    svg.appendChild(g);
+    return g;
+  });
+  const hit = el('rect', {
+    x:P.l, y:0, width:Math.max(1, W - P.l - P.r), height:H, fill:'transparent' });
+  svg.appendChild(hit);
+
+  function at(evt) {
+    const box = svg.getBoundingClientRect();
+    const px = (evt.clientX - box.left) / box.width * W;
+    let i = Math.round((px - P.l) / (W - P.l - P.r) * (n - 1));
+    return Math.max(0, Math.min(n - 1, i));
+  }
+  hit.addEventListener('mousemove', evt => {
+    const i = at(evt);
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i));
+    cross.setAttribute('opacity', 1);
+    dots.forEach((d, k) => {
+      d.setAttribute('cx', X(i)); d.setAttribute('cy', Y(series[k].data[i]));
+      d.setAttribute('opacity', 1);
+    });
+    const rows = series.map((s, k) => `
+      <div class="tip-row">
+        <span class="tip-key"><span class="tip-dot" style="background:${s.color}"></span>${s.name}</span>
+        <span>${opts.fmtTip ? opts.fmtTip(s.data[i]) : s.data[i].toFixed(2)}</span>
+      </div>`).join('');
+    showTip(`<div class="tip-title">${dates[i]}</div>${rows}`, evt);
+  });
+  hit.addEventListener('mouseleave', () => {
+    cross.setAttribute('opacity', 0);
+    dots.forEach(d => d.setAttribute('opacity', 0));
+    hideTip();
   });
 
   mount.innerHTML = '';
   mount.appendChild(svg);
 }
 
-function barChart(mount, values, labels) {
-  const W = 440, H = 260, P = { t:14, r:46, b:52, l:14 };
+/** Column chart for signed values: diverging blue/red, 2px surface gaps. */
+function barChart(mount, values, labels, opts) {
+  opts = opts || {};
+  const W = 440, H = 300, P = { t:12, r:46, b:44, l:4 };
   let lo = Math.min(0, ...values), hi = Math.max(0, ...values);
   const pad = (hi - lo) * 0.12 || 1;
   lo -= pad; hi += pad;
   const n = values.length;
-  const bw = (W - P.l - P.r) / n;
-  const y = v => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
+  const band = (W - P.l - P.r) / n;
+  const bw = Math.min(24, band - 2);            // cap thickness, leave air
+  const Y = v => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
 
-  const svg = svgEl('svg', { viewBox:`0 0 ${W} ${H}` });
-  niceTicks(lo, hi, 5).forEach(t => {
-    svg.appendChild(svgEl('line', {
-      x1:P.l, x2:W-P.r, y1:y(t), y2:y(t),
-      stroke: Math.abs(t) < 1e-9 ? 'rgba(143,163,192,0.5)' : 'rgba(30,45,69,0.7)',
-      'stroke-width':1 }));
-    const lab = svgEl('text', {
-      x:W-P.r+6, y:y(t)+3.5, fill:'#4a6080', 'font-size':9, 'font-family':'monospace' });
-    lab.textContent = t.toFixed(1) + '%';
-    svg.appendChild(lab);
+  const svg = el('svg', { viewBox:`0 0 ${W} ${H}`, role:'img' });
+
+  ticks(lo, hi, 5).forEach(t => {
+    const isZero = Math.abs(t) < 1e-9;
+    svg.appendChild(el('line', {
+      x1:P.l, x2:W - P.r, y1:Y(t), y2:Y(t),
+      stroke:isZero ? AXIS : GRID, 'stroke-width':1 }));
+    svg.appendChild(axisText(W - P.r + 8, Y(t) + 3.8, t.toFixed(1) + '%'));
   });
 
   values.forEach((v, i) => {
-    const top = y(Math.max(v, 0)), bottom = y(Math.min(v, 0));
-    svg.appendChild(svgEl('rect', {
-      x:P.l + i*bw + bw*0.18, y:top, width:bw*0.64,
-      height:Math.max(1, bottom - top), rx:2,
-      fill: v >= 0 ? 'rgba(46,213,115,0.75)' : 'rgba(255,71,87,0.75)' }));
-    const cx = P.l + i*bw + bw/2, cy = H - P.b + 16;
-    const lab = svgEl('text', {
-      x:cx, y:cy, fill:'#4a6080', 'font-size':9,
-      'font-family':'monospace', 'text-anchor':'end',
-      transform:`rotate(-45 ${cx} ${cy})` });
-    lab.textContent = labels[i];
-    svg.appendChild(lab);
+    const cx = P.l + i * band + band / 2;
+    const top = Y(Math.max(v, 0)), bottom = Y(Math.min(v, 0));
+    const h = Math.max(1, bottom - top);
+    const r = Math.min(4, h / 2);
+    svg.appendChild(el('rect', {
+      x:cx - bw / 2, y:top, width:bw, height:h,
+      rx:r, ry:r, fill:v >= 0 ? POS : NEG }));
+    // square off the baseline end so bars grow from a single flat baseline
+    svg.appendChild(el('rect', {
+      x:cx - bw / 2, y:v >= 0 ? bottom - r : top,
+      width:bw, height:Math.min(r, h), fill:v >= 0 ? POS : NEG }));
+    svg.appendChild(axisText(cx, H - P.b + 16, labels[i],
+      { 'text-anchor':'end', transform:`rotate(-45 ${cx} ${H - P.b + 16})` }));
+
+    const hit = el('rect', {
+      x:P.l + i * band, y:P.t, width:band, height:H - P.t - P.b, fill:'transparent' });
+    hit.addEventListener('mousemove', evt => showTip(
+      `<div class="tip-title">${labels[i]}</div>
+       <div class="tip-row"><span class="tip-key">Return</span>
+       <span class="${v < 0 ? 'neg-text' : ''}">${spct(v / 100)}</span></div>`, evt));
+    hit.addEventListener('mouseleave', hideTip);
+    svg.appendChild(hit);
   });
 
   mount.innerHTML = '';
   mount.appendChild(svg);
 }
 
-// ── charts ────────────────────────────────────────────────────────────────
-lineChart(document.getElementById('perfChart'), [
-  { data:R.series.portfolio_indexed, color:'#00d4aa', width:2 },
-  { data:R.series.spy_indexed, color:'rgba(0,153,255,0.8)', dash:'4,4' },
-  { data:R.series.qqq_indexed, color:'rgba(255,107,53,0.7)', dash:'2,4' },
-], R.series.dates, { fmt: t => t.toFixed(0) });
+// ── render charts ─────────────────────────────────────────────────────────
+const perfSeries = [
+  { name:'Portfolio', data:R.series.portfolio_indexed, color:SERIES[0] },
+  { name:'SPY',       data:R.series.spy_indexed,       color:SERIES[1] },
+  { name:'QQQ',       data:R.series.qqq_indexed,       color:SERIES[2] },
+];
+document.getElementById('perfLegend').innerHTML = perfSeries.map(s => `
+  <span class="legend-item"><span class="legend-key" style="background:${s.color}"></span>${s.name}</span>`
+).join('');
+lineChart(document.getElementById('perfChart'), perfSeries, R.series.dates, {
+  fmtAxis: t => t.toFixed(0),
+  fmtTip: v => v.toFixed(2),
+});
 
 barChart(document.getElementById('monthChart'),
   R.monthly_returns.portfolio, R.monthly_returns.labels);
-document.getElementById('monthBadge').textContent =
-  R.monthly_returns.labels.length + ' months';
 
 lineChart(document.getElementById('ddChart'), [
-  { data:R.series.drawdown.map(v => v*100), color:'#ff4757',
-    width:1.6, fill:'rgba(255,71,87,0.18)' },
-], R.series.dates, { fmt: t => t.toFixed(0) + '%', fillBase: 0 });
-document.getElementById('ddBadge').textContent = 'max ' + spct(S.max_drawdown);
+  { name:'Drawdown', data:R.series.drawdown.map(v => v * 100), color:NEG, fill:true },
+], R.series.dates, {
+  includeZero:true, fillBase:0, endLabels:false, rightPad:52,
+  fmtAxis: t => t.toFixed(0) + '%',
+  fmtTip: v => (v === 0 ? '0.00%' : '\u2212' + Math.abs(v).toFixed(2) + '%'),
+});
+document.getElementById('ddSub').textContent =
+  'Maximum ' + spct(S.max_drawdown) + ' from the running peak';
 
-// ── risk rows ─────────────────────────────────────────────────────────────
+// ── risk measures ─────────────────────────────────────────────────────────
 const spy = R.benchmarks.find(b => b.benchmark === 'SPY');
 const riskRows = [
-  ['VaR 95% — parametric', pct(S.var_95_parametric), 'var(--red)'],
-  ['VaR 95% — historical', pct(S.var_95_historical), 'var(--red)'],
-  ['VaR 99% — parametric', pct(S.var_99_parametric), 'var(--red)'],
-  ['VaR 99% — historical', pct(S.var_99_historical), 'var(--red)'],
-  ['Beta vs SPY', num(spy.beta), 'var(--accent2)'],
-  ['Annualised volatility', pct(S.annualised_volatility), 'var(--text)'],
-  ['Avg holding period', num(S.avg_holding_days,1) + ' days', 'var(--text)'],
+  ['Value at risk, 95% — parametric', pct(S.var_95_parametric)],
+  ['Value at risk, 95% — historical', pct(S.var_95_historical)],
+  ['Value at risk, 99% — parametric', pct(S.var_99_parametric)],
+  ['Value at risk, 99% — historical', pct(S.var_99_historical)],
+  ['Beta versus SPY', num(spy.beta)],
+  ['Annualised volatility', pct(S.annualised_volatility)],
+  ['Average holding period', num(S.avg_holding_days,1) + ' days'],
 ];
-document.getElementById('riskRows').innerHTML = riskRows.map(([l,v,c]) => `
-  <div class="row"><span class="row-label">${l}</span>
-  <span class="row-val" style="color:${c}">${v}</span></div>`).join('');
+document.getElementById('riskRows').innerHTML = riskRows.map(([k,v]) => `
+  <div class="kv-row"><span class="kv-key">${k}</span><span class="kv-val">${v}</span></div>`
+).join('');
 
-// ── CAPM rows ─────────────────────────────────────────────────────────────
+// ── CAPM ──────────────────────────────────────────────────────────────────
 document.getElementById('capmRows').innerHTML = R.benchmarks.map(b => `
-  <div class="row" style="flex-direction:column;align-items:stretch;gap:6px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <span class="row-label">${b.benchmark}</span>
-      <span class="row-val" style="color:${b.capm_alpha_ann>=0?'var(--green)':'var(--red)'}">
-        alpha ${spct(b.capm_alpha_ann)}/yr</span>
+  <div class="capm-block">
+    <div class="capm-head">
+      <span class="capm-name">versus ${b.benchmark}</span>
+      <span class="capm-alpha${b.capm_alpha_ann < 0 ? ' neg-text' : ''}">
+        &alpha; ${spct(b.capm_alpha_ann)} p.a.</span>
     </div>
-    <div style="font-size:10px;color:var(--text3);line-height:1.7">
-      95% CI ${spct(b.alpha_ci_low)} to ${spct(b.alpha_ci_high)}<br>
-      beta ${num(b.beta)} · R² ${num(b.r_squared)} · IR ${num(b.info_ratio)}
+    <div class="capm-detail">
+      95% CI ${spct(b.alpha_ci_low)} to ${spct(b.alpha_ci_high)}
+      &middot; &beta; ${num(b.beta)} &middot; R&sup2; ${num(b.r_squared)}
+      &middot; IR ${num(b.info_ratio)}
     </div>
   </div>`).join('');
 
 // ── sector attribution ────────────────────────────────────────────────────
 const sectors = R.pnl_by_sector;
 const maxAbs = Math.max(...sectors.map(s => Math.abs(s.net_pnl)));
-document.getElementById('attribList').innerHTML = sectors.map(s => `
-  <div>
-    <div class="attrib-head">
-      <span class="attrib-name">${s.sector}</span>
-      <span class="attrib-val" style="color:${s.net_pnl>=0?'var(--green)':'var(--red)'}">
-        ${s.net_pnl>=0?'+':''}${money(s.net_pnl)}</span>
+document.getElementById('sectorList').innerHTML = sectors.map(s => {
+  const w = Math.abs(s.net_pnl) / maxAbs * 50;   // half-width: zero sits at centre
+  const positive = s.net_pnl >= 0;
+  return `
+  <div class="sector-row">
+    <div class="sector-head">
+      <span class="sector-name">${s.sector}</span>
+      <span class="sector-val${positive ? '' : ' neg-text'}">${smoney(s.net_pnl)}</span>
     </div>
-    <div class="bar-bg"><div class="bar" style="width:${(Math.abs(s.net_pnl)/maxAbs*100).toFixed(0)}%;
-      background:${s.net_pnl>=0?'var(--accent)':'var(--red)'}"></div></div>
-  </div>`).join('');
+    <div class="sector-track">
+      <div class="sector-fill" style="
+        ${positive ? 'left:50%' : 'right:50%'};
+        width:${w}%; background:${positive ? POS : NEG}"></div>
+    </div>
+  </div>`;
+}).join('');
 
-// ── realised trades table (sortable) ──────────────────────────────────────
+// ── realised trades table ─────────────────────────────────────────────────
 const tradeCols = [
-  ['ticker','Ticker'], ['direction','Side'], ['qty','Qty'],
-  ['entry_date','Entry'], ['entry_price','Entry px'],
-  ['exit_date','Exit'], ['exit_price','Exit px'],
-  ['commission','Comm'], ['net_pnl','Net P&L'],
+  ['ticker','Ticker','text'], ['direction','Side','text'], ['qty','Qty','num'],
+  ['entry_date','Entry','text'], ['entry_price','Entry px','num'],
+  ['exit_date','Exit','text'], ['exit_price','Exit px','num'],
+  ['commission','Comm.','num'], ['net_pnl','Net P&L','num'],
 ];
 let trades = R.realised_trades.slice();
 let sortKey = 'net_pnl', sortDir = -1;
 
-document.getElementById('tradeHead').innerHTML =
-  tradeCols.map(([k,l]) => `<th data-key="${k}">${l}</th>`).join('');
-document.getElementById('tradeBadge').textContent =
-  trades.length + ' round-trips';
+document.getElementById('tradeCaption').textContent =
+  trades.length + ' realised round-trips, net of commissions. Click a column to sort.';
+document.getElementById('tradeHead').innerHTML = tradeCols
+  .map(([k,l]) => `<th data-key="${k}" aria-sort="none" tabindex="0">${l}</th>`).join('');
 
 function renderTrades() {
   trades.sort((a,b) => {
@@ -456,49 +709,53 @@ function renderTrades() {
   });
   document.getElementById('tradeBody').innerHTML = trades.map(t => `
     <tr>
-      <td class="ticker">${t.ticker}</td>
-      <td><span class="tag ${t.direction.toLowerCase()}">${t.direction}</span></td>
+      <td class="name">${t.ticker}</td>
+      <td><span class="side ${t.direction.toLowerCase()}">${t.direction}</span></td>
       <td>${t.qty}</td>
       <td>${t.entry_date}</td>
       <td>${t.entry_price.toFixed(2)}</td>
       <td>${t.exit_date}</td>
       <td>${t.exit_price.toFixed(2)}</td>
       <td>${t.commission.toFixed(2)}</td>
-      <td class="${t.net_pnl>=0?'pos':'neg'}">${t.net_pnl>=0?'+':''}${money(t.net_pnl)}</td>
+      <td class="num${t.net_pnl < 0 ? ' neg' : ''}">${smoney(t.net_pnl)}</td>
     </tr>`).join('');
-  document.querySelectorAll('#tradeHead th').forEach(th =>
-    th.classList.toggle('sorted', th.dataset.key === sortKey));
+  document.querySelectorAll('#tradeHead th').forEach(th => th.setAttribute(
+    'aria-sort', th.dataset.key === sortKey ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'));
 }
-document.getElementById('tradeHead').addEventListener('click', e => {
-  const key = e.target.dataset.key;
+function sortBy(key) {
   if (!key) return;
   if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = -1; }
   renderTrades();
+}
+document.getElementById('tradeHead').addEventListener('click', e => sortBy(e.target.dataset.key));
+document.getElementById('tradeHead').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sortBy(e.target.dataset.key); }
 });
 renderTrades();
 
 // ── open positions ────────────────────────────────────────────────────────
-const openCols = [['ticker','Ticker'],['direction','Side'],['qty','Qty'],
-                  ['entry_date','Entry date'],['entry_price','Entry price']];
 document.getElementById('openHead').innerHTML =
-  openCols.map(([,l]) => `<th>${l}</th>`).join('');
+  ['Ticker','Side','Qty','Entry date','Entry price','Entry commission']
+    .map(l => `<th>${l}</th>`).join('');
 document.getElementById('openBody').innerHTML = R.open_positions.map(p => `
   <tr>
-    <td class="ticker">${p.ticker}</td>
-    <td><span class="tag ${p.direction.toLowerCase()}">${p.direction}</span></td>
+    <td class="name">${p.ticker}</td>
+    <td><span class="side ${p.direction.toLowerCase()}">${p.direction}</span></td>
     <td>${p.qty}</td>
     <td>${p.entry_date}</td>
     <td>${p.entry_price.toFixed(2)}</td>
+    <td>${p.entry_commission.toFixed(2)}</td>
   </tr>`).join('');
-document.getElementById('openBadge').textContent =
-  R.open_positions.length + ' open lots';
 
 // ── footer ────────────────────────────────────────────────────────────────
 document.getElementById('footer').innerHTML =
-  'Generated by <code>tools/build_dashboard.py</code> from <code>outputs/results.json</code>. '
-  + 'Data: ' + R.meta.data + '.<br>'
-  + 'Rebuild: <code>python -m trademetrics.demo &amp;&amp; python tools/build_dashboard.py</code>. '
-  + 'No broker connection, no personal account data, no hardcoded metrics.';
+  '<strong>Provenance.</strong> Generated by <code>tools/build_dashboard.py</code> from '
+  + '<code>outputs/results.json</code>. Data: ' + R.meta.data + '. '
+  + 'Rebuild with <code>python -m trademetrics.demo</code> then '
+  + '<code>python tools/build_dashboard.py</code>.<br>'
+  + '<strong>Scope.</strong> No broker connection, no personal account data, no hardcoded '
+  + 'metrics. Signed values carry both a sign and a colour, so nothing is encoded by colour '
+  + 'alone; the series palette was checked for colour-vision deficiency and contrast.';
 </script>
 </body>
 </html>
