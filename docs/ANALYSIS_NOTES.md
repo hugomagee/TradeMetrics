@@ -1,12 +1,9 @@
-# Analysis notes — methodology defence
+# Analysis notes: methodology defence
 
-Every design decision in the engine, with the reasoning, the alternatives considered, and
-the case against each choice. The second half is the ten questions I would expect to be
-asked about this repository in an interview, answered.
-
-Companion documents: [CV_CLAIMS.md](CV_CLAIMS.md) for what this repo does and does not
-support as a claim; [`analysis/metric_validation.ipynb`](../analysis/metric_validation.ipynb)
-for the evidence behind everything asserted here.
+Every design decision in the engine, the reasoning behind it, the alternatives I considered and
+the case against each choice. The second half answers the ten hardest questions I think a
+reviewer should ask about this repository. The evidence for everything here is in
+[`analysis/metric_validation.ipynb`](../analysis/metric_validation.ipynb).
 
 ---
 
@@ -225,7 +222,7 @@ code produces.
 
 ---
 
-# The ten questions
+# Ten hard questions about this repo
 
 ### 1. Why is there no Sharpe ratio for your actual portfolio?
 
