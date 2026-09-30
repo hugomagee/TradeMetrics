@@ -81,6 +81,6 @@ Python, pandas, NumPy, SciPy, pytest, ruff, Jupyter, GitHub Actions. The report 
 
 ## Author
 
-Hugo Magee · MSc Business Analytics and Data Science, IE University · [LinkedIn](https://linkedin.com/in/hugo-magee-ooo) · hugomagee2002@gmail.com
+Hugo Magee · MSc Business Analytics and Data Science, IE University · [LinkedIn](https://linkedin.com/in/hugo-magee-ooo)
 
 MIT licence
